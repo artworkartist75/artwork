@@ -9,23 +9,48 @@ export const artistDataAdd = async (req, res) => {
         console.log("Artist Data:", req.body);
         const profileImage = req.files.profileImage ? req.files.profileImage[0] : null;
         const coverImage = req.files.coverImage ? req.files.coverImage[0] : null;
+        let profileImg = {};
+        let coverImg = {};
 
         if (!profileImage || !coverImage) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const resizedFiles = await resizeImages([profileImage, coverImage]);
-        // Do something with the resized files, e.g., save their paths to the database
-        const uploadedImage = await uploadMultipleImages(resizedFiles, 'ArtistImages');
-        const successfullUpload = uploadedImage.filter(img => img !== null);
-        if(successfullUpload.length === 0) {
-            return res.status(400).json({ message: 'Failed to upload image to Cloudinary' });
-        }
-        const imageUrl = successfullUpload.map(img => img.secure_url);
-        // Do something with the uploaded image URL, e.g., save it to the database
+        // const resizedFiles = await resizeImages([profileImage, coverImage]);
+        // const uploadedImage = await uploadMultipleImages(resizedFiles, 'ArtistImages');
+        // const successfullUpload = uploadedImage.filter(img => img !== null);
+        // if(successfullUpload.length === 0) {
+        //     return res.status(400).json({ message: 'Failed to upload image to Cloudinary' });
+        // }
+        // const imageUrl = successfullUpload.map(img => img.secure_url);
 
-        // console.log("Uploaded Image URL:", imageUrl);
-        // console.log("socialLink ",req.body.socialLinks);
+        if(profileImage){
+            const profileResized = await resizeImages([profileImage]);
+            onsole.log("certificate resized : ", profileResized);
+            const uploadedProfile = await uploadMultipleImages(certficateResized, 'Artist/Profile');
+            if (!uploadedProfile || uploadedProfile.length === 0) {
+                return res.status(400).json({ message: 'Profile upload failed' });
+            }
+            profileImg = uploadedProfile.map(
+                (image) => ({ url: image.secure_url, publicId: image.public_id })
+            );
+            console.log("Uploaded profile image:", profileImg);
+        }
+
+        if(coverImage){
+            const coverResized = await resizeImages([coverImage]);
+            onsole.log("cover resized : ", coverResized);
+            const uploaded = await uploadMultipleImages(coverResized, 'Artist/cover');
+            if (!uploaded || uploaded.length === 0) {
+                return res.status(400).json({ message: 'Cover upload failed' });
+            }
+            coverImg = uploaded.map(
+                (image) => ({ url: image.secure_url, publicId: image.public_id })
+            );
+            console.log("Uploaded profile image:", coverImg);
+        }
+        
+
         if(req.body.skills){
             req.body.skills = req.body.skills
             .split(",")
@@ -52,8 +77,8 @@ export const artistDataAdd = async (req, res) => {
         const newArtistData = new artistData({
             ...req.body,
             socialLinks: req.body.socialLinks,
-            profileImage: imageUrl[0], // Assuming you want to store the first uploaded image URL
-            coverImage: imageUrl[1] // Assuming you want to store the second uploaded image URL
+            profileImage: profileImg, // Assuming you want to store the first uploaded image URL
+            coverImage: coverImg // Assuming you want to store the second uploaded image URL
         });
         console.log("New Artist Data to be saved:", newArtistData);
         await newArtistData.save();
@@ -68,7 +93,6 @@ export const artistDataAdd = async (req, res) => {
     }
 };
 
-
 export const getArtistData = async (req, res) => {
     try {
         const artistDataList = await artistData.find();
@@ -82,8 +106,8 @@ export const getArtistData = async (req, res) => {
 
 export const updateArtistData = async (req, res) => {
     try{
-        console.log("Files received:", req.files);
-        console.log("Artist Data:", req.body);
+        // console.log("Files received:", req.files);
+        // console.log("Artist Data:", req.body);
         const { id } = req.params;
         let updateData  = {...req.body};
         
@@ -120,7 +144,9 @@ export const updateArtistData = async (req, res) => {
             if(successfullUpload.length === 0) {
                 return res.status(400).json({ message: 'Failed to upload image to Cloudinary' });
             }
-            updateData.profileImage = successfullUpload.map(img => img.secure_url);
+            updateData.profileImage = successfullUpload.map(
+                (image) => ({ url: image.secure_url, publicId: image.public_id })
+            );
         }
         if (coverImage) {
             const resizedFiles = await resizeImages([coverImage]);            
@@ -129,10 +155,10 @@ export const updateArtistData = async (req, res) => {
             if(successfullUpload.length === 0) {
                 return res.status(400).json({ message: 'Failed to upload image to Cloudinary' });
             }
-            updateData.coverImage = successfullUpload.map(img => img.secure_url);
-        }  
-
-        console.log("data after parse ", updateData);
+            updateData.coverImage = successfullUpload.map(
+                (image) => ({ url: image.secure_url, publicId: image.public_id })
+            );
+        } 
 
         const updateArtist = await artistData.findByIdAndUpdate(
             id, 

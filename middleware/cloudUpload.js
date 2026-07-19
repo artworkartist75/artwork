@@ -60,9 +60,10 @@ export async function uploadMultipleImages(files, folder = 'Products') {
 }
 
 
-export const deleteImageFromCloudinary = async (imageUrl) => {
+export const deleteImageFromCloudinary = async (publicId) => {
   try {
-    const publicId = imageUrl.split('/').pop().split('.')[0]; // Extract public ID
+    // const publicId = imageUrl.split('/').pop().split('.')[0]; // Extract public ID
+    console.log(publicId);
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
     console.error('Error deleting image from Cloudinary:', error);

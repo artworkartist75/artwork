@@ -14,13 +14,17 @@ const artistSchema = new mongoose.Schema(
     },
 
     profileImage: {
-      type: String,
-      default: "",
+      url: String,
+      publicId: String,
+      // type: String,
+      // default: "",
     },
 
     coverImage: {
-      type: String,
-      default: "",
+      url: String,
+      publicId: String,
+      // type: String,
+      // default: "",
     },
 
     bio: {

@@ -1,7 +1,7 @@
 import artwork from '../schema/Artwork.js';
 import Artist from '../schema/ArtistSchema.js';
 import { resizeImages } from '../utils/resize.js';
-import { uploadMultipleImages } from '../middleware/cloudUpload.js';
+import { deleteImageFromCloudinary, uploadMultipleImages } from '../middleware/cloudUpload.js';
 import { generateUniqueSlug } from '../utils/generateSlug.js';
 
 export const artworkAdd = async (req, res) => {
@@ -73,18 +73,40 @@ export const getArtWork = async ( req, res ) => {
 export const updateArtwork = async (req, res) => {
   try {
     const { id } = req.params;
-
+    console.log("artwork id ", id);
     let updateData = {
       ...req.body,
     };
+    const existingArtwork = await artwork.findById(id);
+    let finalImages = [...existingArtwork.artworkImages];
 
+    // console.log("data -> ",updateData);
     // Update slug if title changes
     if (updateData.title) {
       updateData.slug = await generateUniqueSlug(updateData.title);
+      console.log("inside slug create : ",updateData.slug);
+    }
+
+    //if there deleted image in data then
+    if(updateData.deletedImages){
+      const deletedImages = JSON.parse(updateData.deletedImages);
+      
+      await Promise.all(
+        deletedImages.map((publicId) =>
+          deleteImageFromCloudinary(publicId)
+        )
+      );
+
+      // Remove from DB
+      finalImages = existingArtwork.artworkImages.filter(
+        (img) => !deletedImages.includes(img.publicId)
+      );
+
     }
 
     // Upload new images only if provided
     if (req.files && req.files.length > 0) {
+      console.log("image have to upload", req.files);
       const resizedImages = await resizeImages(req.files);
 
       const uploadedImages = await uploadMultipleImages(
@@ -92,11 +114,14 @@ export const updateArtwork = async (req, res) => {
         "artwork"
       );
 
-      updateData.artworkImages = uploadedImages.map((image) => ({
+      const imgsupload = uploadedImages.map((image) => ({
         url: image.secure_url,
         publicId: image.public_id,
       }));
-    }
+
+      //imgs are in db 
+      finalImages.push(...imgsupload);
+    } 
 
     // Convert comma-separated strings to arrays if needed
     if (updateData.tags) {
@@ -105,7 +130,7 @@ export const updateArtwork = async (req, res) => {
         .map((tag) => tag.trim())
         .filter(Boolean);
     }
-
+    updateData.artworkImages = finalImages;
     const updatedArtwork = await artwork.findByIdAndUpdate(
       id,
       updateData,
@@ -120,6 +145,7 @@ export const updateArtwork = async (req, res) => {
         message: "Artwork not found",
       });
     }
+    console.log("updated data : ", updatedArtwork);
 
     return res.status(200).json({
       success: true,
@@ -132,6 +158,49 @@ export const updateArtwork = async (req, res) => {
 
     return res.status(500).json({
       message: "Internal server error",
+    });
+  }
+};
+
+export const deleteArtwork = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const artId = "6a4a3718a44edb6e01aa4262";
+    const art = await artwork.findById(id);
+
+    if (!art) {
+      return res.status(404).json({
+        success: false,
+        message: "art not found",
+      });
+    }
+
+    if(art.artworkImages){
+      await Promise.all(
+        art.artworkImages.map((publicId) =>
+          deleteImageFromCloudinary(publicId)
+        )
+      );
+    }
+
+    await artwork.findByIdAndDelete(id);
+    await Artist.findByIdAndUpdate( artId ,{
+        $pull: {
+          featuredArtwork: id,
+        },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Exhibition deleted successfully",
+    });
+
+  } catch (error) {
+    console.error("Delete Exhibition Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };
