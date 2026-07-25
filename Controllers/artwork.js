@@ -204,3 +204,20 @@ export const deleteArtwork = async (req, res) => {
     });
   }
 };
+
+export const getFeaturedArtWork = async (req,res) => {
+  try {
+    const artworks = await artwork.find({ isFeatured: true });
+
+    res.status(200).json({
+      success: true,
+      data: artworks,
+    });
+  } catch (error) {
+    console.error("messge",error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+}
