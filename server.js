@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 const corsOptions = {
-  origin: '*', // Allow requests from any origin
+  origin: ["https://sachinartwork.vercel.app","https://updateartwork.vercel.app","http://localhost:4173","http://localhost:5173"], // Allow requests from any origin
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allow specific HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
