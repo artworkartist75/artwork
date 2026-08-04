@@ -8,6 +8,7 @@ import uploadData from './Routes/atrtistRoute/uploadData.js';
 import updateData from './Routes/atrtistRoute/updateData.js';
 import deleteData from './Routes/atrtistRoute/deleteData.js';
 import getuserdata from './Routes/userRoute/getUserData.js';
+import userAuth from './Routes/authenticate/userAuth.js';
 const app = express();
 configDotenv();
 
@@ -29,6 +30,7 @@ app.use('/api/v1/Artist/upload', uploadData);
 app.use('/api/v1/Artist/update', updateData);
 app.use('/api/v1/Artist/delete', deleteData);
 app.use('/api/v1/User/data', getuserdata);
+app.use('/api/v1/Artist/authenticate/user/', userAuth);
 
 app.get('/', (req, res) => {
   res.send('Hello ArtWork World!');
