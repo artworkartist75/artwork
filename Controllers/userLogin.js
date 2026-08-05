@@ -10,7 +10,7 @@ export const userLogin = async (req, res) => {
         
         // const { loginData } = req.body;
         const { email, password } = req.body;
-        console.log('Received login request:', { email, password });
+        // console.log('Received login request:', { email, password });
 
         // Validate email and password
         if (!email || !password) {
