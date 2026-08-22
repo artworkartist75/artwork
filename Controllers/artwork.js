@@ -221,3 +221,29 @@ export const getFeaturedArtWork = async (req,res) => {
     });
   }
 }
+
+export const getArtWorkSlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    console.log("slug ->", slug);
+    const art = await artwork.findOne({ slug });
+    console.log("artwork by slug ->", art);
+    if (!art) {
+      return res.status(404).json({
+        success: false,
+        message: "Artwork not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: art,
+    });
+  } catch (error) {
+    console.error("Error fetching artwork by slug:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
