@@ -3,6 +3,7 @@ import { updateArtistData } from '../../Controllers/artistData.js';
 import { updateArtwork } from '../../Controllers/artwork.js';
 import { uploadImageMulter } from '../../middleware/upload.js';
 import { updateExhibition } from '../../Controllers/exhibition.js';
+import { UpdatePaymentHandler } from '../../Controllers/artClassHandler.js';
 // import { createExhibition } from '../../Controllers/exhibition.js';
 // import { collabAdd } from '../../Controllers/collab.js';
 
@@ -30,5 +31,10 @@ router.put('/exhibition/:id',
     updateExhibition
 )
 
+// router.put('/art/enroll/update', UpdatePaymentHandler);
+router.patch(
+  "/art/enroll/class/payment/:paymentStatus/:enroll_id",
+  UpdatePaymentHandler
+);
 
 export default router;

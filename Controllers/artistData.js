@@ -39,7 +39,7 @@ export const artistDataAdd = async (req, res) => {
 
         if(coverImage){
             const coverResized = await resizeImages([coverImage]);
-            onsole.log("cover resized : ", coverResized);
+            console.log("cover resized : ", coverResized);
             const uploaded = await uploadMultipleImages(coverResized, 'Artist/cover');
             if (!uploaded || uploaded.length === 0) {
                 return res.status(400).json({ message: 'Cover upload failed' });

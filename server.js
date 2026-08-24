@@ -9,6 +9,7 @@ import updateData from './Routes/atrtistRoute/updateData.js';
 import deleteData from './Routes/atrtistRoute/deleteData.js';
 import getuserdata from './Routes/userRoute/getUserData.js';
 import userAuth from './Routes/authenticate/userAuth.js';
+import ArtClassData from './Routes/userRoute/ArtClassData.js';
 const app = express();
 configDotenv();
 
@@ -25,6 +26,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/api/v1/User/data/art', ArtClassData);
 app.use('/api/v1/Artist/get', getArtistData);
 app.use('/api/v1/Artist/upload', uploadData);
 app.use('/api/v1/Artist/update', updateData);
