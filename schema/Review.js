@@ -5,6 +5,7 @@ const reviewSchema = new mongoose.Schema(
     artist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Artist",
+      // type: String,
       required: true,
     },
 
@@ -37,10 +38,10 @@ const reviewSchema = new mongoose.Schema(
       required: true,
       maxlength: 500,
     },
-
+    //will change to false after admin approval
     isApproved: {
       type: Boolean,
-      default: false,
+      default: true,
     }
   },
   {
